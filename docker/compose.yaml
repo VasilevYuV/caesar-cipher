@@ -1,0 +1,8 @@
+services:
+  caesar-cipher:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8080:8080"
+    container_name: caesar-cipher-app

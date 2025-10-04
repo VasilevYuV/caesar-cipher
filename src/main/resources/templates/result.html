@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Результат</title>
+  <style>
+    * { font-family: "Manrope_Cut_008 Medium", sans-serif; }
+    body { font-family: "Manrope_Cut_008 ExtraBold", sans-serif; margin: 40px; }
+    .container { max-width: 800px; margin: 0 auto; }
+    .result-section { margin-bottom: 30px; }
+    .error { color: red; }
+    textarea { width: 100%; height: 200px; margin-bottom: 10px; }
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      margin: 5px;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      color: white;
+    }
+    .back-btn { background: #6c757d; }
+    .back-btn:hover { background: #545b62; }
+    .save-btn { background: #28a745; }
+    .save-btn:hover { background: #218838; }
+    .btn-container { margin-top: 20px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Результат обработки</h1>
+
+  <div th:if="${error}" class="error">
+    <h3>Ошибка:</h3>
+    <p th:text="${error}"></p>
+  </div>
+
+  <div th:unless="${error}">
+    <div class="result-section">
+      <h3>Исходный текст:</h3>
+      <textarea readonly th:text="${original}"></textarea>
+    </div>
+
+    <div class="result-section">
+      <h3>Результат:</h3>
+      <textarea readonly th:text="${result}"></textarea>
+    </div>
+
+    <p><strong>Файл:</strong> <span th:text="${fileName}"></span></p>
+  </div>
+
+  <div class="btn-container">
+    <a href="/" class="btn back-btn">Назад</a>
+    <button class="btn save-btn" onclick="saveFile()">Сохранить результат</button>
+  </div>
+</div>
+<script th:if="${error == null}">
+  const fileName = "[(${fileName})]";
+  const mode = "[(${mode})]";
+
+  function saveFile() {
+    const resultText = document.querySelectorAll('textarea[readonly]')[1].value;
+
+    const prefix = mode === 'encryption' ? 'encrypted_' : 'decrypted_';
+    const newFileName = prefix + fileName;
+
+    const blob = new Blob([resultText], { type: 'text/plain;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = newFileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
+  }
+</script>
+</body>
+</html>
