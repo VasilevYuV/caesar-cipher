@@ -142,7 +142,8 @@ caesar-cipher/
 ## <span style="font-family: 'Manrope_Cut_008 ExtraBold', sans-serif">Лицензия</span>
 <a id="лицензия"> </a>
 <p style="font-family: 'Manrope_Cut_008 Medium', sans-serif">
-Этот проект распространяется под лицензией MIT. Подробности см. в файле LICENSE.
+Этот проект распространяется под лицензией MIT. Подробности см. в файле 
+<a href="https://github.com/VasilevYuV/caesar-cipher/blob/develop/LICENSE">LICENSE</a>.
 </p>
 
 ---
