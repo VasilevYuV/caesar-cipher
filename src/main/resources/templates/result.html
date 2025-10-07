@@ -7,9 +7,12 @@
     * { font-family: "Manrope_Cut_008 Medium", sans-serif; }
     body { font-family: "Manrope_Cut_008 ExtraBold", sans-serif; margin: 40px; }
     .container { max-width: 800px; margin: 0 auto; }
-    .result-section { margin-bottom: 30px; }
     .error { color: red; }
     textarea { width: 100%; height: 200px; margin-bottom: 10px; }
+    .slider-container { margin: 20px 0; padding: 15px; border-radius: 5px; }
+    .slider-label { display: block; margin-bottom: 10px; font-weight: bold; }
+    .slider { width: 100%; margin: 10px 0; accent-color: #007bff }
+    .key-value { font-weight: bold; color: #007bff; }
     .btn {
       display: inline-block;
       padding: 10px 20px;
@@ -36,18 +39,27 @@
     <p th:text="${error}"></p>
   </div>
 
-  <div th:unless="${error}">
     <div class="result-section">
-      <h3>Исходный текст:</h3>
+      <h3 th:text="'Исходный текст файла' + ${fileName} + ':'">Исходный текст</h3>
       <textarea readonly th:text="${original}"></textarea>
     </div>
 
     <div class="result-section">
       <h3>Результат:</h3>
-      <textarea readonly th:text="${result}"></textarea>
+      <textarea readonly id="resultText" th:text="${result}"></textarea>
     </div>
 
-    <p><strong>Файл:</strong> <span th:text="${fileName}"></span></p>
+    <p><strong>Язык:</strong> <span id="currentLanguage" th:text="${language}"></span></p>
+    <p><strong>Режим:</strong> <span id="currentMode" th:text="${mode}"></span></p>
+
+    <div th:unless="${error}">
+      <div class="slider-container">
+        <label class="slider-label">Изменение сдвига:</label>
+        <input type="range" id="keySlider" class="slider"
+               min="1" th:attr="max=${language == 'russian' ? 31 : 25}"
+               th:value="${key}">
+        <div>Текущий сдвиг: <span id="currentKey" class="key-value" th:text="${key}"></span></div>
+      </div>
   </div>
 
   <div class="btn-container">
@@ -55,17 +67,49 @@
     <button class="btn save-btn" onclick="saveFile()">Сохранить результат</button>
   </div>
 </div>
+
 <script th:if="${error == null}">
   const fileName = "[(${fileName})]";
   const mode = "[(${mode})]";
+  const originalContent = `[(${original})]`;
+  const language = "[(${language})]";
 
+  const keySlider = document.getElementById('keySlider');
+  const currentKey = document.getElementById('currentKey');
+  const resultText = document.getElementById('resultText');
+
+  keySlider.addEventListener('input', function() {
+    const newKey = parseInt(this.value);
+    currentKey.textContent = newKey;
+    updateResult(newKey);
+  });
+
+  function updateResult(key) {
+    const formData = new FormData();
+    formData.append('content', originalContent);
+    formData.append('key', key);
+    formData.append('language', language);
+    formData.append('mode', mode);
+
+    fetch('/updateResult', {
+      method: 'POST',
+      body: formData
+    })
+            .then(response => response.text())
+            .then(newResult => {
+              resultText.value = newResult;
+            })
+            .catch(error => {
+              console.error('Ошибка:', error);
+            });
+  }
   function saveFile() {
-    const resultText = document.querySelectorAll('textarea[readonly]')[1].value;
-
+    const resultTextValue = document.getElementById('resultText').value;
+    const currentKeyValue = document.getElementById('currentKey').textContent;
     const prefix = mode === 'encryption' ? 'encrypted_' : 'decrypted_';
-    const newFileName = prefix + fileName;
+    const newFileName = prefix + 'key_' + currentKeyValue + '_' + fileName;
 
-    const blob = new Blob([resultText], { type: 'text/plain;charset=utf-8' });
+    const blob = new Blob([resultTextValue], { type: 'text/plain;charset=utf-8' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = newFileName;

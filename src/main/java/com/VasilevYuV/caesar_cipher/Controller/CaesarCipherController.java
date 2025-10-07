@@ -16,6 +16,22 @@ public class CaesarCipherController {
         return "index";
     }
 
+    @PostMapping("/updateResult")
+    @ResponseBody
+    public String updateResult(
+            @RequestParam String content,
+            @RequestParam int key,
+            @RequestParam String language,
+            @RequestParam String mode) throws Exception {
+
+        CaesarCipher cipher = new CaesarCipher();
+        if ("encryption".equals(mode)) {
+            return cipher.encrypt(content, key, language);
+        } else {
+            return cipher.decrypt(content, key, language);
+        }
+    }
+
     @PostMapping("/process")
     public String processFile(
             @RequestParam("file") MultipartFile file,
@@ -39,6 +55,8 @@ public class CaesarCipherController {
             model.addAttribute("original", content);
             model.addAttribute("result", result);
             model.addAttribute("fileName", file.getOriginalFilename());
+            model.addAttribute("language", language);
+            model.addAttribute("key", key);
 
         } catch (IOException e) {
             model.addAttribute("error", "Ошибка чтения файла: " + e.getMessage());
